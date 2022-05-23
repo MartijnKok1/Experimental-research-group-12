@@ -1,0 +1,66 @@
+---
+title: "ER"
+author: "Martijn Kok"
+date: "4/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(haven)
+
+path = file.path("Dataset_study1.sav")
+dataset = read_sav(path)
+
+path = file.path("Dataset_study2.sav")
+dataset2 = read_sav(path)
+```
+
+```{r}
+#cleaning the data
+databtg <- dataset %>% select(ResponseId, rank_b_tg_1) %>% na.omit
+datactg <- dataset %>% select(ResponseId, rank_c_tg_1) %>% na.omit
+databhm <- dataset %>% select(ResponseId, rank_b_hm_1) %>% na.omit
+datachm <- dataset %>% select(ResponseId, rank_c_hm_1) %>% na.omit
+
+```
+
+```{r}
+#Mean analyses
+mean(databtg$rank_b_tg_1)
+mean(datactg$rank_c_tg_1)
+mean(databhm$rank_b_hm_1)
+mean(datachm$rank_c_hm_1)
+```
+
+```{r}
+#T test Buy to go, Buy home
+t.test(dataset$rank_b_tg_1, dataset$rank_b_hm_1, var.equal = TRUE)
+#T test Buy to go, Consume to go
+t.test(dataset$rank_b_tg_1, dataset$rank_c_tg_1, var.equal = TRUE)
+#T test Buy home, Consume home
+t.test(dataset$rank_b_hm_1, dataset$rank_c_hm_1, var.equal = TRUE)
+
+
+```
+
+```{r}
+#Filter Dataset idea 2
+dataprivate <- dataset2 %>% select(ResponseId, relative_rank_1, WTP_self, WTP_others, Main_Block_DO_buy_private) %>% na.omit
+datapremium <- dataset2 %>% select(ResponseId, relative_rank_1, WTP_self, WTP_others, Main_Block_DO_buy_premium) %>% na.omit
+```
+
+```{r}
+#Mean analyses
+mean(dataprivate$relative_rank_1)
+mean(datapremium$relative_rank_1)
+mean(dataprivate$WTP_self)
+mean(dataprivate$WTP_others)
+mean(datapremium$WTP_self)
+mean(datapremium$WTP_others)
+```
+
