@@ -1,0 +1,155 @@
+---
+title: "Assignment B2"
+author: "Sophie van Lotringen"
+date: "23 mei 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("ez") 
+install.packages("multcomp") 
+install.packages("emmeans") 
+install.packages("car") 
+install.packages("rstatix") 
+install.packages("lmer") 
+install.packages("lmerTest") 
+install.packages("afex") 
+
+```
+
+## Load packages
+```{r}
+library(dplyr)
+library(haven)
+library(ez) 
+library("multcomp") 
+library("emmeans") 
+library("car") 
+library("rstatix") 
+library("lmer") 
+library("lmerTest") 
+library("afex") 
+library(ggplot2)
+
+```
+
+
+## Set working directory
+```{r}
+setwd("C:/Users/sophi/OneDrive/Documenten/Marketing Analytics/Experimental Research/Assignment B2")
+
+study_1 <- read_sav("./Idea 1/Exp+Res+2022+Idea+1+-+consume+v+purchase_May+9,+2022_15.04.sav")
+study_2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May+9,+2022_15.03.sav")
+
+```
+
+## Clean
+```{r}
+
+summary(study_1)
+
+## Create factors for each condition
+
+study_1$FL_14_DO_buy_togo[is.na(study_1$FL_14_DO_buy_togo)] <- 0
+study_1$FL_14_DO_consumetogo[is.na(study_1$FL_14_DO_consumetogo)] <- 0
+study_1$FL_14_DO_buyhome[is.na(study_1$FL_14_DO_buyhome)] <- 0
+study_1$FL_14_DO_consumehome[is.na(study_1$FL_14_DO_consumehome)] <- 0
+
+#buy vs. consume
+
+study_1$buy_consume <- study_1$FL_14_DO_buy_togo + study_1$FL_14_DO_buyhome
+study_1$buy_consume <- as.factor(study_1$buy_consume)
+levels(study_1$buy_consume) <- list("buy"=1,"consume"=0) 
+
+#one vs. many units
+study_1$one_many <- study_1$FL_14_DO_buyhome + study_1$FL_14_DO_consumehome
+study_1$one_many <- as.factor(study_1$one_many)
+levels(study_1$one_many) <- list("many units"=1,"one unit"=0) 
+
+## Put all perceived ranks in one variable
+
+study_1$rank <- rowSums(study_1[,c("rank_b_hm_1", "rank_b_tg_1", "rank_c_hm_1", "rank_c_tg_1")], na.rm=TRUE)
+
+
+```
+
+
+## Study 1: Will the below average effect be less strong for consumption than for purchases?
+```{r}
+#We have a 2x2 design: buy vs consume, one unit vs. many units. Therefore we will need an ANOVA.
+
+#First calculate means to see whether below average effect exists:
+mean(study_1$rank_b_tg_1, na.rm = TRUE)
+mean(study_1$rank_c_tg_1, na.rm = TRUE)
+mean(study_1$rank_b_hm_1, na.rm = TRUE)
+mean(study_1$rank_c_hm_1, na.rm = TRUE)
+
+#All means are below <50, so below average effect exists. 
+
+#Perform 2x2 ANOVA
+
+attach(study_1) 
+interaction.model <- aov(rank ~ buy_consume*one_many) 
+Anova(interaction.model, type = 3)
+
+#We find a significant main effect of the one vs. many condition. We find no significant effect of buying vs. consuming on the below average effect, and no interaction between 
+mean(study_1$rank_b_tg_1, na.rm = TRUE)
+mean(study_1$rank_c_tg_1, na.rm = TRUE)
+
+mean(study_1$rank_b_hm_1, na.rm = TRUE)
+mean(study_1$rank_c_hm_1, na.rm = TRUE)
+
+#We find that the below average effect is stronger for goods that you buy in bulk (pack of coffee instead of one cup of coffee). 
+
+means <- c(mean(study_1$rank_b_tg_1, na.rm = TRUE), mean(study_1$rank_c_tg_1, na.rm = TRUE), mean(study_1$rank_b_hm_1, na.rm = TRUE), mean(study_1$rank_c_hm_1, na.rm = TRUE))
+
+barplot(means, names= c("buy one unit", "consume one unit", "buy multiple units", "consume multiple units"))
+
+
+```
+
+
+
+## Study 2: Is the below average effect stronger for private label products than for their premium label equivalents?
+## And does this affect people’s WTP compared to what they think the average person’s WTP is?
+```{r}
+
+
+```
+
+
+
+```{r}
+
+
+```
+
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+
+```{r}
+
+
+```
