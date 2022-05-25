@@ -18,6 +18,10 @@ install.packages("rstatix")
 install.packages("lmer") 
 install.packages("lmerTest") 
 install.packages("afex") 
+install.packages("moments")
+install.packages("sm")
+install.packages("eatATA")
+install.packages("rstatix")
 
 ```
 
@@ -34,6 +38,11 @@ library("lmer")
 library("lmerTest") 
 library("afex") 
 library(ggplot2)
+library(moments)
+library("ggpubr")
+library("sm")
+library("eatATA")
+library("rstatix")
 
 ```
 
@@ -47,7 +56,7 @@ study_2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May
 
 ```
 
-## Clean
+## Create Variables
 ```{r}
 
 summary(study_1)
@@ -78,9 +87,24 @@ study_1$rank <- rowSums(study_1[,c("rank_b_hm_1", "rank_b_tg_1", "rank_c_hm_1", 
 ```
 
 
+## Check assumptions for ANOVA
+```{r}
+# Normally distributed
+ggdensity(study_1$rank, 
+          main = "Distribution of the dependent variable",
+          xlab = "Rank",)
+
+skewness(study_1$rank, na.rm = TRUE)
+shapiro.test(study_1$rank) #<0.05, so significantly different from normal distribution
+
+# The data is not normally distributed
+
+```
+
+
 ## Study 1: Will the below average effect be less strong for consumption than for purchases?
 ```{r}
-#We have a 2x2 design: buy vs consume, one unit vs. many units. Therefore we will need an ANOVA.
+#We have a 2x2 design: buy vs consume, one unit vs. many units. Unfortunately the data does not meet the assumption of a normal distribution, therefore we cannot use an ANCOVA. Since no non-parametric alternatives to an ANCOVA exist, we will not look for interactions and use two Mann-Whitney-Wilcoxon tests, one for each independent variable. 
 
 #First calculate means to see whether below average effect exists:
 mean(study_1$rank_b_tg_1, na.rm = TRUE)
@@ -88,30 +112,30 @@ mean(study_1$rank_c_tg_1, na.rm = TRUE)
 mean(study_1$rank_b_hm_1, na.rm = TRUE)
 mean(study_1$rank_c_hm_1, na.rm = TRUE)
 
-#All means are below <50, so below average effect exists. 
+#All means are below <50, so below average effect exists. But is it significantly stronger/ weaker when bought in bulk or bought to consume immediately? 
 
-#Perform 2x2 ANOVA
+#Mann-Whitney-Wilcoxon tests:
 
-attach(study_1) 
-interaction.model <- aov(rank ~ buy_consume*one_many) 
-Anova(interaction.model, type = 3)
+wilcox.test(rank ~ one_many, data=study_1)
+wilcox.test(rank ~ buy_consume, data=study_1)
 
-#We find a significant main effect of the one vs. many condition. We find no significant effect of buying vs. consuming on the below average effect, and no interaction between 
-mean(study_1$rank_b_tg_1, na.rm = TRUE)
-mean(study_1$rank_c_tg_1, na.rm = TRUE)
-
-mean(study_1$rank_b_hm_1, na.rm = TRUE)
-mean(study_1$rank_c_hm_1, na.rm = TRUE)
-
-#We find that the below average effect is stronger for goods that you buy in bulk (pack of coffee instead of one cup of coffee). 
+#We find a significant main effect of the one vs. many condition. We find no significant effect of buying vs. consuming on the below average effect
 
 means <- c(mean(study_1$rank_b_tg_1, na.rm = TRUE), mean(study_1$rank_c_tg_1, na.rm = TRUE), mean(study_1$rank_b_hm_1, na.rm = TRUE), mean(study_1$rank_c_hm_1, na.rm = TRUE))
 
 barplot(means, names= c("buy one unit", "consume one unit", "buy multiple units", "consume multiple units"))
 
 
+#We find that the below average effect is less strong for goods that you buy in bulk (pack of coffee instead of one cup of coffee). 
+
 ```
 
+## Validity test
+```{r}
+
+
+
+```
 
 
 ## Study 2: Is the below average effect stronger for private label products than for their premium label equivalents?
@@ -147,9 +171,27 @@ barplot(means, names= c("buy one unit", "consume one unit", "buy multiple units"
 
 ```
 
-
+#Scrap paper
 
 ```{r}
+## ANCOVA
+
+
+sm.ancova(x = study_1$buy_consume, y = study_1$rank, group = study_1$group)
+
+
+## ANOVA
+
+interaction_model <- kruskal.test(rank ~ buy_consume*one_many, data = study_1)
+
+ 
+interaction.model <- aov(rank ~ buy_consume*one_many) 
+Anova(interaction.model, type = 3)
+
+## Create group indicators
+
+study_1 <- dummiesToFactor(study_1, dummies = c("FL_14_DO_buy_togo", "FL_14_DO_consumetogo", "FL_14_DO_buyhome", "FL_14_DO_consumehome"), facVar = "group")
+
 
 
 ```
