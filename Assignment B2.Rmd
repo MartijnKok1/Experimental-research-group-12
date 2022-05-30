@@ -1,7 +1,7 @@
 ---
 title: "Assignment B2"
-author: "Sophie van Lotringen"
-date: "23 mei 2022"
+author: "Sophie van Lotringen|Jesse van Lier|Anouk Bor|Martijn Kok|Youri Hanegraaf"
+date: "30 mei 2022"
 output: html_document
 ---
 
