@@ -22,7 +22,8 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("sm")
 #install.packages("eatATA")
 #install.packages("rstatix")
-
+#install.packages("psych")
+#install.packages("ltm")
 ```
 
 ## Load packages
@@ -43,6 +44,8 @@ library("ggpubr")
 library("sm")
 library("eatATA")
 library("rstatix")
+library("psych")
+library("ltm")
 
 ```
 
@@ -52,7 +55,7 @@ library("rstatix")
 setwd("C:/Users/sophi/OneDrive/Documenten/Marketing Analytics/Experimental Research/Assignment B2")
 
 study_1 <- read_sav("./Idea 1/Exp+Res+2022+Idea+1+-+consume+v+purchase_May+9,+2022_15.04.sav")
-#study_2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May+9,+2022_15.03.sav")
+dataset2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May+9,+2022_15.03.sav")
 
 ```
 
@@ -157,46 +160,73 @@ barplot(means, names= c("buy one unit", "consume one unit", "buy multiple units"
 
 ```
 
-## Validity test
-```{r}
-
-
-
-```
-
-
 ## Study 2: Is the below average effect stronger for private label products than for their premium label equivalents?
 ## And does this affect people’s WTP compared to what they think the average person’s WTP is?
-```{r}
-
-
-```
-
-
 
 ```{r}
 
 
+dataset4ca_study2 <- dataset2 %>% 
+  select(relative_rank_1, WTP_self, WTP_others)
+
+cronbach.alpha(dataset4ca_study2)
 ```
-
-
 
 ```{r}
+#Filter Dataset idea 2
 
+#Compute WTP average
+dataset2$WTP_average <- dataset2$WTP_others - dataset2$WTP_self
 
+#Create seperate datasets for means (not of importance)
+dataprivate <- dataset2 %>% select(ResponseId, relative_rank_1, WTP_self, WTP_others, Main_Block_DO_buy_private, WTP_average) %>% na.omit
+datapremium <- dataset2 %>% select(ResponseId, relative_rank_1, WTP_self, WTP_others, Main_Block_DO_buy_premium, WTP_average) %>% na.omit
+
+#Create groups for private and premium within the main dataset
+dataset2$Main_Block_DO_buy_private[is.na(dataset2$Main_Block_DO_buy_private)] <- 2
+dataset2$Main_Block_DO_buy_groups <- with(dataset2, factor(Main_Block_DO_buy_private, levels = 1:2,
+                                                           labels = c("Private", "Premium")))
 ```
-
 
 ```{r}
-
-
+#Mean analyses for observational purpose
+mean(dataprivate$relative_rank_1)
+mean(datapremium$relative_rank_1)
+mean(dataprivate$WTP_self)
+mean(dataprivate$WTP_others)
+mean(datapremium$WTP_self)
+mean(datapremium$WTP_others)
 ```
-
 
 ```{r}
+#Normality test (observational through density plot). We observe that the distribution is non-normal.
+ggdensity(dataset2$relative_rank_1,
+          main = "Density",
+          xlab = "Relative Rank")
 
+ggdensity(dataset2$WTP_average,
+          main = "Density",
+          xlab = "WTP_average")
+
+#Shapiro wilkinson test for normality (Both variables ar distributed non-normally)
+shapiro.test(dataset2$relative_rank_1)
+shapiro.test(dataset2$WTP_average)
+
+#Levene's test for homoscedasticity (non-normal distributions)
+leveneTest(relative_rank_1 ~ Main_Block_DO_buy_groups, data = dataset2)
+leveneTest(WTP_average ~ Main_Block_DO_buy_groups, data = dataset2)
+
+#We find that WTP suffers from heteroskedasticity
+
+#Manova cannot be run due to a non-normal distribution. We therefore run a Wilcox test for the main effect since the WTP data suffers from heteroskedasticity.
+
+wilcox.test(relative_rank_1 ~ Main_Block_DO_buy_groups, data=dataset2)
+
+#We find that the main effect of private vs. premium is significant. 
 
 ```
+
+
 
 #Scrap paper
 
