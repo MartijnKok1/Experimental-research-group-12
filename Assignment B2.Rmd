@@ -10,18 +10,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-install.packages("ez") 
-install.packages("multcomp") 
-install.packages("emmeans") 
-install.packages("car") 
-install.packages("rstatix") 
-install.packages("lmer") 
-install.packages("lmerTest") 
-install.packages("afex") 
-install.packages("moments")
-install.packages("sm")
-install.packages("eatATA")
-install.packages("rstatix")
+#install.packages("ez") 
+#install.packages("multcomp") 
+#install.packages("emmeans") 
+#install.packages("car") 
+#install.packages("rstatix") 
+#install.packages("lmer") 
+#install.packages("lmerTest") 
+#install.packages("afex") 
+#install.packages("moments")
+#install.packages("sm")
+#install.packages("eatATA")
+#install.packages("rstatix")
 
 ```
 
@@ -52,21 +52,41 @@ library("rstatix")
 setwd("C:/Users/sophi/OneDrive/Documenten/Marketing Analytics/Experimental Research/Assignment B2")
 
 study_1 <- read_sav("./Idea 1/Exp+Res+2022+Idea+1+-+consume+v+purchase_May+9,+2022_15.04.sav")
-study_2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May+9,+2022_15.03.sav")
+#study_2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May+9,+2022_15.03.sav")
 
 ```
 
-## Create Variables
+
+## Clean data
 ```{r}
-
-summary(study_1)
-
-## Create factors for each condition
+# Create factor variables. 
 
 study_1$FL_14_DO_buy_togo[is.na(study_1$FL_14_DO_buy_togo)] <- 0
 study_1$FL_14_DO_consumetogo[is.na(study_1$FL_14_DO_consumetogo)] <- 0
 study_1$FL_14_DO_buyhome[is.na(study_1$FL_14_DO_buyhome)] <- 0
 study_1$FL_14_DO_consumehome[is.na(study_1$FL_14_DO_consumehome)] <- 0
+
+study_1$gender <- as.factor(study_1$gender)
+levels(study_1$gender) <- list("Male" = 1, "Female" = 2, "Non-binary / third gender" = 3, "Prefer not to say" = 4)
+study_1$Status <- as.factor(study_1$Status)
+study_1$UserLanguage <- as.factor(study_1$UserLanguage)
+
+# Remove preview from data
+
+study_1 <- study_1[study_1$Status != 1, ]
+
+```
+
+## Get summary statistics 
+```{r}
+
+summary(study_1)
+
+```
+
+
+## Create Variables
+```{r}
 
 #buy vs. consume
 
@@ -78,6 +98,12 @@ levels(study_1$buy_consume) <- list("buy"=1,"consume"=0)
 study_1$one_many <- study_1$FL_14_DO_buyhome + study_1$FL_14_DO_consumehome
 study_1$one_many <- as.factor(study_1$one_many)
 levels(study_1$one_many) <- list("many units"=1,"one unit"=0) 
+
+#Create factors of all variables:
+study_1$FL_14_DO_buy_togo <- as.factor(study_1$FL_14_DO_buy_togo)
+study_1$FL_14_DO_consumetogo <- as.factor(study_1$FL_14_DO_consumetogo)
+study_1$FL_14_DO_buyhome <- as.factor(study_1$FL_14_DO_buyhome)
+study_1$FL_14_DO_consumehome <- as.factor(study_1$FL_14_DO_consumehome)
 
 ## Put all perceived ranks in one variable
 
@@ -104,9 +130,10 @@ shapiro.test(study_1$rank) #<0.05, so significantly different from normal distri
 
 ## Study 1: Will the below average effect be less strong for consumption than for purchases?
 ```{r}
-#We have a 2x2 design: buy vs consume, one unit vs. many units. Unfortunately the data does not meet the assumption of a normal distribution, therefore we cannot use an ANCOVA. Since no non-parametric alternatives to an ANCOVA exist, we will not look for interactions and use two Mann-Whitney-Wilcoxon tests, one for each independent variable. 
+#We have a 2x2 design: buy vs consume, one unit vs. many units. Unfortunately the data does not meet the assumption of a normal distribution, therefore we cannot use an ANOVA. Since no non-parametric alternatives to a 2x2 ANOVA exist, we will not look for interactions and use two Mann-Whitney-Wilcoxon tests, one for each independent variable. 
 
 #First calculate means to see whether below average effect exists:
+
 mean(study_1$rank_b_tg_1, na.rm = TRUE)
 mean(study_1$rank_c_tg_1, na.rm = TRUE)
 mean(study_1$rank_b_hm_1, na.rm = TRUE)
