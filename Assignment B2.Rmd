@@ -24,6 +24,9 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("rstatix")
 #install.packages("psych")
 #install.packages("ltm")
+#install.packages("dplyr")
+#install.packages("haven")
+#install.packages("ggpubr")
 ```
 
 ## Load packages
@@ -52,7 +55,7 @@ library("ltm")
 
 ## Set working directory
 ```{r}
-setwd("C:/Users/sophi/OneDrive/Documenten/Marketing Analytics/Experimental Research/Assignment B2")
+setwd("C:(SETWDHERE!!!)")
 
 study_1 <- read_sav("./Idea 1/Exp+Res+2022+Idea+1+-+consume+v+purchase_May+9,+2022_15.04.sav")
 dataset2 <- read_sav("./Idea 2/Exp+Res+2022+Idea+2+-+premium+vs+private+label_May+9,+2022_15.03.sav")
